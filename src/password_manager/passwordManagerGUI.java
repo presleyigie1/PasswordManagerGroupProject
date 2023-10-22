@@ -5,16 +5,33 @@
  */
 
 package password_manager;
+import java.sql.Connection;
+import java.sql.*;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author presl
  */
 public class passwordManagerGUI extends javax.swing.JFrame {
+    Connection myConn;
 
     /** Creates new form passwordManagerGUI */
     public passwordManagerGUI() {
         initComponents();
+        getConnection();
+    }
+    
+    private void getConnection() {
+//creating connection to DB
+        try {
+            myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/password_manager", "root", "dragonroot38");
+            System.out.println("Database connected");
+        } catch (SQLException ex) {
+            System.out.println("Error Connecting:" + ex.getMessage());
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
     }
 
     /** This method is called from within the constructor to
