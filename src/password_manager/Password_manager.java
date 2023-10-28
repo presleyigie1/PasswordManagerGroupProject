@@ -17,6 +17,16 @@ public class Password_manager {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        //making the GUI's objects so visibility can be set
+        LoginGUI loginGUI = new LoginGUI();
+        RegisterGUI registerGUI = new RegisterGUI();
+        HomeGUI HomeGUI = new HomeGUI();
+        
+        //setting the visibility
+        //this logic so that when the application is run you are brought to login
+        loginGUI.setVisible(true);
+        registerGUI.setVisible(false);
+        HomeGUI.setVisible(false);
     }
 
 }
