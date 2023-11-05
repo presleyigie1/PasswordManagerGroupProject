@@ -205,11 +205,13 @@ public class RegisterGUI extends javax.swing.JFrame {
         if (!Arrays.equals(registPassword, confirmRegPassword)) {
     JOptionPane.showMessageDialog(this, "Passwords do not match.", "Error Registering your account", JOptionPane.ERROR_MESSAGE);
         }
-        if (!Arrays.equals(securityKey, confSecurityKey)) {
+        if (!Arrays.equals(securityKey, confSecurityKey)  ) {
     JOptionPane.showMessageDialog(this, "Security keys do not match.", "Error Registering your account", JOptionPane.ERROR_MESSAGE);
         }
+        
+        
         //checks if they all match, if they do then it displays successfully registered, (credentials will be added to database), the window is then closed and the login GUI opens up
-        if(Arrays.equals(securityKey, confSecurityKey) && (Arrays.equals(registPassword, confirmRegPassword))){
+        if(Arrays.equals(securityKey, confSecurityKey) && (Arrays.equals(registPassword, confirmRegPassword && securityKey.length == 4))){
                JOptionPane.showMessageDialog(this, "Account Created Successfully, you will be prompted to login.", "Success", JOptionPane.INFORMATION_MESSAGE);
                dispose();
                new LoginGUI().setVisible(true);
