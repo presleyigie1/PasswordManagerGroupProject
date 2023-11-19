@@ -5,17 +5,46 @@
  */
 package password_manager;
 
+import javax.swing.JOptionPane;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+
 /**
  *
  * @author presl
  */
+//https://www.youtube.com/watch?v=RqXpQMUkGto
 public class HomeGUI extends javax.swing.JFrame {
 
     /**
      * Creates new form HomeGUI
      */
+    //setting up to store and display the username of the user logged in passed from the loginGUI
+    //overloading constructer to avoid errors and have flexibility
+    private String currentUser;
+   
+    int userId ;
+   /* public HomeGUI(int userId) {
+        this.userId = userId;
+        initComponents();
+        userIdL.setText(String.valueOf(userId));
+       
+        
+    }*/
+    //https://www.youtube.com/watch?v=YD-uDuFrf8s
+    
+    public HomeGUI(String username) {
+        this.currentUser = username;
+        this.userId = Password_manager.getUserIdByUsername(username);
+        initComponents();
+        name.setText(currentUser);
+        userIdL.setText(String.valueOf(userId));
+        
+    }
+    
     public HomeGUI() {
         initComponents();
+        name.setText("Welcome");
+        
     }
 
     /**
@@ -28,12 +57,15 @@ public class HomeGUI extends javax.swing.JFrame {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
+        name = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
+        siteTF = new javax.swing.JTextField();
+        addCreds = new javax.swing.JButton();
+        viewPasswords = new javax.swing.JButton();
+        storedpwTF = new javax.swing.JPasswordField();
+        userIdL = new javax.swing.JLabel();
+        logOut = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -41,8 +73,7 @@ public class HomeGUI extends javax.swing.JFrame {
         jLabel1.setForeground(new java.awt.Color(255, 51, 51));
         jLabel1.setText("Password:");
 
-        jLabel2.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
-        jLabel2.setText("John");
+        name.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
 
         jLabel3.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 51, 51));
@@ -52,33 +83,69 @@ public class HomeGUI extends javax.swing.JFrame {
         jLabel4.setForeground(new java.awt.Color(255, 51, 51));
         jLabel4.setText("Welcome ");
 
-        jButton1.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
-        jButton1.setForeground(new java.awt.Color(102, 102, 255));
-        jButton1.setText("Add Credentials");
+        addCreds.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        addCreds.setForeground(new java.awt.Color(102, 102, 255));
+        addCreds.setText("Add Credentials");
+        addCreds.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addCredsActionPerformed(evt);
+            }
+        });
+
+        viewPasswords.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        viewPasswords.setForeground(new java.awt.Color(102, 102, 255));
+        viewPasswords.setText("View Passwords");
+        viewPasswords.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewPasswordsActionPerformed(evt);
+            }
+        });
+
+        logOut.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        logOut.setForeground(new java.awt.Color(102, 102, 255));
+        logOut.setText("Log Out");
+        logOut.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                logOutActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(71, 71, 71)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(166, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(71, 71, 71)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(storedpwTF, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(siteTF, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(39, 39, 39)
+                        .addComponent(addCreds)
+                        .addGap(33, 33, 33)
+                        .addComponent(viewPasswords, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(23, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(65, 65, 65))
+                        .addComponent(userIdL)
+                        .addGap(41, 41, 41))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jButton1)
-                        .addGap(111, 111, 111))))
+                        .addComponent(name, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(46, 46, 46))))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(logOut, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(141, 141, 141))
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
                     .addGap(106, 106, 106)
@@ -88,19 +155,25 @@ public class HomeGUI extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(63, 63, 63)
-                .addComponent(jLabel2)
-                .addGap(93, 93, 93)
+                .addGap(69, 69, 69)
+                .addComponent(name)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(userIdL)
+                .addGap(61, 61, 61)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(siteTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(39, 39, 39)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(76, 76, 76)
-                .addComponent(jButton1)
-                .addContainerGap(83, Short.MAX_VALUE))
+                    .addComponent(storedpwTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 140, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(addCreds)
+                    .addComponent(viewPasswords, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(logOut, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(17, 17, 17))
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
                     .addGap(56, 56, 56)
@@ -111,6 +184,52 @@ public class HomeGUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void viewPasswordsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewPasswordsActionPerformed
+        // TODO add your handling code here:
+        boolean success = Password_manager.showCredentials(Password_manager.getUserIdByUsername(currentUser));
+        
+        if(success){
+            System.out.println("Passwords viewed");
+        }
+        else{
+            System.out.println("Error");
+        }
+    }//GEN-LAST:event_viewPasswordsActionPerformed
+
+    private void addCredsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addCredsActionPerformed
+        // TODO add your handling code here:
+        //String site = siteTF.getText();
+        String storedPassword = new String(storedpwTF.getPassword());
+        String site = siteTF.getText();
+;
+          //int userId = Password_manager.getCurrentUserId();
+        
+          //hash the site and password
+        String hashedStoredPassword = BCrypt.hashpw(new String(storedPassword), BCrypt.gensalt());
+        String siteHashed = BCrypt.hashpw(new String(site), BCrypt.gensalt());
+        
+        JOptionPane.showMessageDialog(this, userId);
+        
+        //calling the addCredentials method fromm Password_Manager.java
+        boolean success = Password_manager.addCredentials(userId, siteHashed, hashedStoredPassword);
+        
+        //display that the password has been added successfully
+        if(success){
+            JOptionPane.showMessageDialog(this,"Password has been added to database", "Password Added Successfully", JOptionPane.INFORMATION_MESSAGE);
+        }
+        else{
+            JOptionPane.showMessageDialog(this,"Failed");
+        }
+    }//GEN-LAST:event_addCredsActionPerformed
+
+    private void logOutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logOutActionPerformed
+        // TODO add your handling code here:
+        //will log you out and close the window and then show the loginGUI
+        JOptionPane.showMessageDialog(null,"You have been logged out");
+        dispose();
+        new LoginGUI().setVisible(true);
+    }//GEN-LAST:event_logOutActionPerformed
+    
     /**
      * @param args the command line arguments
      */
@@ -141,18 +260,34 @@ public class HomeGUI extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new HomeGUI().setVisible(true);
+                
+                //new HomeGUI(currentUser).setVisible(true);
+                //two insatnces - one with user one without - overloading 
+                HomeGUI homeGUI = new HomeGUI();
+                HomeGUI homeGUIUser = new HomeGUI("currentUser");
+                /*int userId = Password_manager.getCurrentUserId();
+                HomeGUI homeGUIUserId = new HomeGUI(userId);*/
+                
+                //setting visibility
+                
+                homeGUI.setVisible(true);
+                homeGUIUser.setVisible(true);
+               // homeGUIUserId.setVisible(true);
+                
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton addCreds;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
+    private javax.swing.JButton logOut;
+    private javax.swing.JLabel name;
+    private javax.swing.JTextField siteTF;
+    private javax.swing.JPasswordField storedpwTF;
+    private javax.swing.JLabel userIdL;
+    private javax.swing.JButton viewPasswords;
     // End of variables declaration//GEN-END:variables
 }

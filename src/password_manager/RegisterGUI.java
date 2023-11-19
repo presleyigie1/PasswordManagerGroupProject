@@ -7,7 +7,14 @@
 package password_manager;
 
 import java.util.Arrays;
+import java.util.Random;
 import javax.swing.JOptionPane;
+
+//importing a BCrypt library compatible with gensalt  - https://www.youtube.com/watch?v=RqXpQMUkGto
+import org.springframework.security.crypto.bcrypt.BCrypt;
+
+
+
 
 /**
  *
@@ -33,7 +40,6 @@ public class RegisterGUI extends javax.swing.JFrame {
 
         jLabel4 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        regUsername = new javax.swing.JTextField();
         regPassword = new javax.swing.JPasswordField();
         confRegPassword = new javax.swing.JPasswordField();
         jLabel3 = new javax.swing.JLabel();
@@ -46,6 +52,7 @@ public class RegisterGUI extends javax.swing.JFrame {
         login = new javax.swing.JButton();
         jLabel8 = new javax.swing.JLabel();
         confSecKey = new javax.swing.JPasswordField();
+        regUsername = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -53,6 +60,12 @@ public class RegisterGUI extends javax.swing.JFrame {
         jLabel4.setText("Password Manager");
 
         jLabel2.setText("Username");
+
+        regPassword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                regPasswordActionPerformed(evt);
+            }
+        });
 
         jLabel3.setText("Password");
 
@@ -118,22 +131,22 @@ public class RegisterGUI extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(46, 46, 46)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                    .addComponent(jLabel3)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(regPassword))
-                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                    .addComponent(jLabel2)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(regUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel5)
                                 .addGap(18, 18, 18)
                                 .addComponent(confRegPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(82, 82, 82)
-                                .addComponent(jLabel7))))
+                                .addComponent(jLabel7))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                    .addComponent(jLabel2)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(regUsername))
+                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                    .addComponent(jLabel3)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(regPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(177, 177, 177)
                         .addComponent(login))
@@ -199,9 +212,29 @@ public class RegisterGUI extends javax.swing.JFrame {
         char[] confSecurityKey = confSecKey.getPassword();
         char[] registPassword = regPassword.getPassword();
         char[] confirmRegPassword = confRegPassword.getPassword();
+        String username = regUsername.getText();
+        
+         //if username is not entered
+         if(username.isEmpty()){
+             JOptionPane.showMessageDialog(null,"Please Enter a username");
+         }
+        
+        //addiing conditions if the password is not entered/security key
+        if(registPassword.length == 0 ){
+            JOptionPane.showMessageDialog(this,"Please Enter a Password ", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        if(confirmRegPassword.length == 0 ){
+            JOptionPane.showMessageDialog(this,"You did not confirm your password ", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        
+         if(securityKey.length == 0 ){
+            JOptionPane.showMessageDialog(this,"Please Enter a Security Key ", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        if(confSecurityKey.length == 0 ){
+            JOptionPane.showMessageDialog(this,"Please confirm your secuirty key ", "Error", JOptionPane.ERROR_MESSAGE);
+        }
         
         //checks if they match, if one doesnt match from either then the corresponding error message will appear
-        
         if (!Arrays.equals(registPassword, confirmRegPassword)) {
     JOptionPane.showMessageDialog(this, "Passwords do not match.", "Error Registering your account", JOptionPane.ERROR_MESSAGE);
         }
@@ -210,14 +243,37 @@ public class RegisterGUI extends javax.swing.JFrame {
         }
         
         
+        //hashing the password using BCrypt
         //checks if they all match, if they do then it displays successfully registered, (credentials will be added to database), the window is then closed and the login GUI opens up
-        if(Arrays.equals(securityKey, confSecurityKey) && (Arrays.equals(registPassword, confirmRegPassword && securityKey.length == 4))){
-               JOptionPane.showMessageDialog(this, "Account Created Successfully, you will be prompted to login.", "Success", JOptionPane.INFORMATION_MESSAGE);
-               dispose();
+        if(Arrays.equals(securityKey, confSecurityKey) && (Arrays.equals(registPassword, confirmRegPassword) && securityKey.length == 4)){
+            
+            //Hashing the password and security key  
+            String passwordHashed = BCrypt.hashpw(new String(registPassword), BCrypt.gensalt());
+            String securityKeyHashed = BCrypt.hashpw(new String(securityKey), BCrypt.gensalt());
+            
+            //need to generate random user ID's so it's not sequential
+            Random random = new Random();
+            int genId = 10000+ random.nextInt(90000);
+            
+            boolean registrationSucccessful = Password_manager.insertNewUserIntoDB(genId,username, passwordHashed,securityKeyHashed);
+           
+            
+            if(registrationSucccessful){
+                //if the account is created successfully, give the user a success message and close the register GUI and open the Login GUI
+                JOptionPane.showMessageDialog(this, "Account created successfully, you will now be prompted to the login page", "Success", JOptionPane.INFORMATION_MESSAGE);
+                dispose();
                new LoginGUI().setVisible(true);
+            }
+            else{
+                //if teh registratiion user has failed show, there was an erroir registering account
+                JOptionPane.showMessageDialog(this,"Error registering the account", "There was an error registering your account", JOptionPane.ERROR_MESSAGE);
+            }
         }
+                            
     }//GEN-LAST:event_jButton1ActionPerformed
 
+        
+      
     private void loginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginActionPerformed
         // TODO add your handling code here:
         dispose();
@@ -264,6 +320,10 @@ public class RegisterGUI extends javax.swing.JFrame {
              evt.consume(); // Ignore key presses if the length exceeds 4
          }
     }//GEN-LAST:event_confSecKeyKeyTyped
+
+    private void regPasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_regPasswordActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_regPasswordActionPerformed
 
     /**
      * @param args the command line arguments

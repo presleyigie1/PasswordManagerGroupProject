@@ -5,17 +5,28 @@
  */
 package password_manager;
 
+import javax.swing.JOptionPane;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+
+//https://www.youtube.com/watch?v=RqXpQMUkGto
+//https://www.youtube.com/watch?v=6K9OpqDM_RM&t=756s&pp=ygUfbG9naW4gcGFzc3dvcmQga2FuYWdlciBqYXZhIHNxbA%3D%3D
 /**
  *
  * @author presl
  */
 public class LoginGUI extends javax.swing.JFrame {
-
+    //variable for the username that will be passed into the home page
+    private String currentUser;
+    //private int userID;
     /**
      * Creates new form LoginGUI
      */
     public LoginGUI() {
         initComponents();
+    }
+    
+    public String getCurrentUsername(){
+        return currentUser;
     }
 
     /**
@@ -153,6 +164,43 @@ public class LoginGUI extends javax.swing.JFrame {
 
     private void loginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginBtnActionPerformed
         // TODO add your handling code here:
+        String username = usernameTF.getText();
+        char[] typedPassword = passwordTF.getPassword();
+        char[] typedSecKey = secKey.getPassword();
+        
+        
+        //will get the password and security that was hashed for the specific account based on the username from the database
+        String[] userInfo = Password_manager.findUsername(username);
+        
+        
+        if(userInfo != null){
+            //declare and initialise
+            //adds the associated password & security key into the array
+            //current user - so we can store the username and pass it thhough to the HomeGUI anddisplay the name of the user logged in
+            currentUser = username;
+            String passwordHashedDB = userInfo[0];
+            String secKeyHashedDB = userInfo[1];
+            
+            
+            
+            //verification of the password and secuirty key that was typed - comparing the hashed with what has just been typed in the input field - compares with credentials from databse 
+            if(BCrypt.checkpw(new String(typedPassword), passwordHashedDB)&& BCrypt.checkpw(new String(typedSecKey), secKeyHashedDB)){
+                //pop up if the login is a success
+                JOptionPane.showMessageDialog(this, "Login Successful!", "Login Successful", JOptionPane.INFORMATION_MESSAGE);
+                //closes LogiGUI
+                dispose();
+                //open HomeGUI so user can add passwords to manage
+                new HomeGUI(currentUser).setVisible(true);
+            }
+            else{
+                JOptionPane.showMessageDialog(this, "Ooops, the username, password or secuity key is incorrect", "Login Error...", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        //if user not found
+        else{
+            JOptionPane.showMessageDialog(this, "We can't find the user", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        
     }//GEN-LAST:event_loginBtnActionPerformed
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
@@ -167,6 +215,7 @@ public class LoginGUI extends javax.swing.JFrame {
         // TODO add your handling code here:
         char c = evt.getKeyChar();
         
+        //if its not a digit
         if(!Character.isDigit(c)){
             evt.consume();
         }
