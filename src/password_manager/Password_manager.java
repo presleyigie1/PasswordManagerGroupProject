@@ -73,6 +73,7 @@ public class Password_manager {
         String dbUser = properties.getProperty("dbUser");
         String dbPassword = properties.getProperty("dbPassword"); 
         
+        //prevent sql injection
         String insertQuery = "INSERT INTO users (user_id ,username, password, security_key) VALUES (?, ?, ?, ?)";
 
         //making to the database
